@@ -7,7 +7,7 @@ from discord import (ApplicationContext, Bot, Embed,
                      EmbedField, Member, Option, Permissions, Button, PartialEmoji)
 # from enums import PunishmentType
 from pytimeparse.timeparse import timeparse
-from view import SupportTicketCreateView, AddminTicketCreatView, ReportUserModal, SupportModal, BotProblemsModal
+from view import SupportTicketCreateView, SupportModal, TeamComplaintModal, ApplicationModal
 
 config = configparser.ConfigParser()
 config.read("config.ini")
@@ -31,21 +31,21 @@ async def on_ready():
 @bot.slash_command(description="supportticket")
 async def suppticket(interaction: ApplicationContext):
     embed = Embed(
-        title=f'Support Ticket',
-        description='If you need help, feel free to open one of the following tickets. A team member will be with you in no time.',
+        title=f'Support Tickets',
+        description='Falls du Hilfe brauchst, jemanden melden oder dich Bewerben möchtest, dann öffne eines der folgenden Tickets. Ein Teammitglied wird in kürze bei dir sein.',
     )
     await interaction.respond("Created ticket embed", ephemeral=True)
     await interaction.channel.send(embed=embed, view=SupportTicketCreateView())
 
 
-@bot.slash_command(description="adminticket")
-async def adminsuppticket(interaction: ApplicationContext):
-    embed = Embed(
-        title=f'Admin Ticket',
-        description='If you need help, feel free to open one of the following tickets. A team admin will be with you in no time.',
-    )
-    await interaction.respond("Created ticket embed", ephemeral=True)
-    await interaction.channel.send(embed=embed, view=AddminTicketCreatView())
+# @bot.slash_command(description="adminticket")
+# async def adminsuppticket(interaction: ApplicationContext):
+#     embed = Embed(
+#         title=f'Admin Ticket',
+#         description='If you need help, feel free to open one of the following tickets. A team admin will be with you in no time.',
+#     )
+#     await interaction.respond("Created ticket embed", ephemeral=True)
+#     await interaction.channel.send(embed=embed, view=AddminTicketCreatView())
 
 bot.run(TOKEN)
 # db.connection.close()
