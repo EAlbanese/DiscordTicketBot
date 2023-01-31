@@ -32,7 +32,7 @@ async def on_ready():
 async def suppticket(interaction: ApplicationContext):
     embed = Embed(
         title=f'Support Tickets',
-        description='Falls du Hilfe brauchst, jemanden melden oder dich Bewerben möchtest, dann öffne eines der folgenden Tickets. Ein Teammitglied wird in kürze bei dir sein.',
+        description='Falls du Hilfe brauchst, jemanden melden oder dich Bewerben möchtest, dann öffne eines der folgenden Tickets. Ein Teammitglied wird in kürze bei dir sein. \n \n ⛔ Für das missbrauchen des Ticket-Systems gibt es Verwarnungen.',
     )
     await interaction.respond("Created ticket embed", ephemeral=True)
     await interaction.channel.send(embed=embed, view=SupportTicketCreateView())
