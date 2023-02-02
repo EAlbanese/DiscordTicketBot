@@ -4,7 +4,7 @@ from datetime import datetime
 
 # import database as database
 from discord import (ApplicationContext, Bot, Embed,
-                     EmbedField, Member, Option, Permissions, Button, PartialEmoji)
+                     EmbedField, Member, Option, Permissions, Button, PartialEmoji, Activity, ActivityType)
 # from enums import PunishmentType
 from pytimeparse.timeparse import timeparse
 from view import SupportTicketCreateView, SupportModal, TeamComplaintModal, ApplicationModal
@@ -25,6 +25,7 @@ bot = Bot(debug_guild=DEBUG_GUILDS)
 @bot.event
 async def on_ready():
     print(f'{bot.user} is connected')
+    await bot.change_presence(activity=Activity(type=ActivityType.watching, name="your Tickets"))
 
 
 # Ticket System
