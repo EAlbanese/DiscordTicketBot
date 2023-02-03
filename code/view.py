@@ -1,6 +1,10 @@
-from discord import ui, ButtonStyle, InputTextStyle, Interaction, Embed, PermissionOverwrite, ChannelType
+from discord import ui, ButtonStyle, InputTextStyle, Interaction, Embed, PermissionOverwrite, ChannelType, Client
 
+client = Client()
 
+class IdManage(ui.View):
+    threadID = 0
+    
 # Ticket System
 
 class TicketManageView(ui.View):
@@ -10,8 +14,11 @@ class TicketManageView(ui.View):
         await interaction.channel.delete()
 
     @ui.button(label="Claim Ticket", style=ButtonStyle.primary)
-    async def second_button_callback(self, button, interaction):
+    async def second_button_callback(self, button, interaction: Interaction):
         staffrole = interaction.guild.get_role(1070629289520807947)
+        
+        thread = interaction.guild.get_thread(IdManage.threadID)
+               
         if staffrole not in interaction.user.roles:
             await interaction.response.send_message("⛔ Keine Berechtigung!", ephemeral=True)
             return
@@ -20,7 +27,7 @@ class TicketManageView(ui.View):
         embed.author.name = interaction.user.display_name
         embed.author.icon_url = interaction.user.display_avatar
         await interaction.response.send_message(embed=embed)
-
+        await thread.edit(name=f"{interaction.user.name}")
 
 class SupportModal(ui.Modal):
     def __init__(self, *args, **kwargs) -> None:
@@ -37,10 +44,10 @@ class SupportModal(ui.Modal):
         staffrole = interaction.guild.get_role(1070629289520807947)
         channel = await interaction.guild.fetch_channel(1071005969359847464)
         response = await channel.create_thread(name=f"{interaction.user.display_name}", type=ChannelType.public_thread)
-        threadId = response.id
-        thread = interaction.guild.get_thread(threadId)
+        IdManage.threadID = response.id
+        thread = interaction.guild.get_thread(IdManage.threadID)
         
-        await interaction.response.send_message(f"Ticket eröffnet in <#{threadId}>", ephemeral=True)
+        await interaction.response.send_message(f"Ticket eröffnet in <#{IdManage.threadID}>", ephemeral=True)
         await thread.send(f"<@{interaction.user.id}> <@{staffrole.id}>", embed=embed, view=TicketManageView())
 
 
@@ -59,10 +66,10 @@ class TeamComplaintModal(ui.Modal):
         staffrole = interaction.guild.get_role(1070629289520807947)
         channel = await interaction.guild.fetch_channel(1071005969359847464)
         response = await channel.create_thread(name=f"{interaction.user.display_name}", type=ChannelType.public_thread)
-        threadId = response.id
-        thread = interaction.guild.get_thread(threadId)
+        IdManage.threadID = response.id
+        thread = interaction.guild.get_thread(IdManage.threadID)
         
-        await interaction.response.send_message(f"Ticket eröffnet in <#{threadId}>", ephemeral=True)
+        await interaction.response.send_message(f"Ticket eröffnet in <#{IdManage.threadID}>", ephemeral=True)
         await thread.send(f"<@{interaction.user.id}> <@{staffrole.id}>", embed=embed, view=TicketManageView())
 
 
@@ -82,10 +89,10 @@ class ApplicationModal(ui.Modal):
         staffrole = interaction.guild.get_role(1070629289520807947)
         channel = await interaction.guild.fetch_channel(1071005969359847464)
         response = await channel.create_thread(name=f"{interaction.user.display_name}", type=ChannelType.public_thread)
-        threadId = response.id
-        thread = interaction.guild.get_thread(threadId)
+        IdManage.threadID = response.id
+        thread = interaction.guild.get_thread(IdManage.threadID)
         
-        await interaction.response.send_message(f"Ticket eröffnet in <#{threadId}>", ephemeral=True)
+        await interaction.response.send_message(f"Ticket eröffnet in <#{IdManage.threadID}>", ephemeral=True)
         await thread.send(f"<@{interaction.user.id}> <@{staffrole.id}>", embed=embed, view=TicketManageView())
 
 
