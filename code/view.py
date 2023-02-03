@@ -1,4 +1,4 @@
-from discord import ui, ButtonStyle, InputTextStyle, Interaction, Embed, PermissionOverwrite
+from discord import ui, ButtonStyle, InputTextStyle, Interaction, Embed, PermissionOverwrite, ChannelType
 
 
 # Ticket System
@@ -34,16 +34,14 @@ class SupportModal(ui.Modal):
             title="Anliegen", description="✅ Danke, dass du dich an den Support gewandt hast. Unser Team wird sich gut darum kümmern!")
         embed.add_field(name="Wo benötigst du Hilfe?",
                         value=self.children[0].value)
-        category = await interaction.guild.fetch_channel(1070627816669986847)
         staffrole = interaction.guild.get_role(1070629289520807947)
-        ticketchannel = await interaction.guild.create_text_channel(f"{interaction.user.display_name}", category=category, overwrites={
-            interaction.user: PermissionOverwrite(read_messages=True),
-            interaction.guild.default_role: PermissionOverwrite(
-                read_messages=False),
-            staffrole: PermissionOverwrite(read_messages=True)
-        })
-        await interaction.response.send_message(f"Ticket eröffnet in <#{ticketchannel.id}>", ephemeral=True)
-        await ticketchannel.send(f"<@{interaction.user.id}> <@{staffrole.id}>", embed=embed, view=TicketManageView())
+        channel = await interaction.guild.fetch_channel(1071005969359847464)
+        response = await channel.create_thread(name=f"{interaction.user.display_name}", type=ChannelType.public_thread)
+        threadId = response.id
+        thread = interaction.guild.get_thread(threadId)
+        
+        await interaction.response.send_message(f"Ticket eröffnet in <#{threadId}>", ephemeral=True)
+        await thread.send(f"<@{interaction.user.id}> <@{staffrole.id}>", embed=embed, view=TicketManageView())
 
 
 class TeamComplaintModal(ui.Modal):
@@ -58,16 +56,14 @@ class TeamComplaintModal(ui.Modal):
                       description="✅ Danke, dass du dich an den Support gewandt hast. Unser Team wird sich gut darum kümmern!")
         embed.add_field(name="Was für eine Team Beschwerde hast du?",
                         value=self.children[0].value)
-        category = await interaction.guild.fetch_channel(1070627816669986847)
         staffrole = interaction.guild.get_role(1070629289520807947)
-        ticketchannel = await interaction.guild.create_text_channel(f"{interaction.user.display_name}", category=category, overwrites={
-            interaction.user: PermissionOverwrite(read_messages=True),
-            interaction.guild.default_role: PermissionOverwrite(
-                read_messages=False),
-            staffrole: PermissionOverwrite(read_messages=True)
-        })
-        await interaction.response.send_message(f"Ticket eröffnet in <#{ticketchannel.id}>", ephemeral=True)
-        await ticketchannel.send(f"<@{interaction.user.id}> <@{staffrole.id}>", embed=embed, view=TicketManageView())
+        channel = await interaction.guild.fetch_channel(1071005969359847464)
+        response = await channel.create_thread(name=f"{interaction.user.display_name}", type=ChannelType.public_thread)
+        threadId = response.id
+        thread = interaction.guild.get_thread(threadId)
+        
+        await interaction.response.send_message(f"Ticket eröffnet in <#{threadId}>", ephemeral=True)
+        await thread.send(f"<@{interaction.user.id}> <@{staffrole.id}>", embed=embed, view=TicketManageView())
 
 
 class ApplicationModal(ui.Modal):
@@ -78,22 +74,19 @@ class ApplicationModal(ui.Modal):
             label="Als was möchtest du dich bewerben?", style=InputTextStyle.long))
 
     async def callback(self, interaction: Interaction):
-        embed = Embed(title="Application",
+        embed = Embed(title="Bewerbung",
                       description="✅ Danke, dass du dich an den Support gewandt hast. Unser Team wird sich gut darum kümmern!")
         embed.add_field(
             name="Als was möchtest du dich bewerben?", value=self.children[0].value)
 
-        category = await interaction.guild.fetch_channel(1070627816669986847)
         staffrole = interaction.guild.get_role(1070629289520807947)
-
-        ticketchannel = await interaction.guild.create_text_channel(f"{interaction.user.display_name}", category=category, overwrites={
-            interaction.user: PermissionOverwrite(read_messages=True),
-            interaction.guild.default_role: PermissionOverwrite(
-                read_messages=False),
-            staffrole: PermissionOverwrite(read_messages=True)
-        })
-        await interaction.response.send_message(f"Ticket eröffnet in <#{ticketchannel.id}>", ephemeral=True)
-        await ticketchannel.send(f"<@{interaction.user.id}> <@{staffrole.id}>", embed=embed, view=TicketManageView())
+        channel = await interaction.guild.fetch_channel(1071005969359847464)
+        response = await channel.create_thread(name=f"{interaction.user.display_name}", type=ChannelType.public_thread)
+        threadId = response.id
+        thread = interaction.guild.get_thread(threadId)
+        
+        await interaction.response.send_message(f"Ticket eröffnet in <#{threadId}>", ephemeral=True)
+        await thread.send(f"<@{interaction.user.id}> <@{staffrole.id}>", embed=embed, view=TicketManageView())
 
 
 class SupportTicketCreateView(ui.View):
