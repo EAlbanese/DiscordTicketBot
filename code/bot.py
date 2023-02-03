@@ -2,7 +2,7 @@ import configparser
 import math
 from datetime import datetime
 
-# import database as database
+import database as database
 from discord import (ApplicationContext, Bot, Embed,
                      EmbedField, Member, Option, Permissions, Button, PartialEmoji, Activity, ActivityType)
 # from enums import PunishmentType
@@ -17,9 +17,9 @@ DEBUG_GUILDS = None if config.get('Bot', 'DebugGuilds') == "" else list(
     map(lambda id: int(id), config.get('Bot', 'DebugGuilds').split(',')))
 
 bot = Bot(debug_guild=DEBUG_GUILDS)
-# db = database.Database("bot.db")
+db = database.Database("bot.db")
 
-# db.create_tables()
+db.create_tables()
 
 
 @bot.event
@@ -38,15 +38,5 @@ async def suppticket(interaction: ApplicationContext):
     await interaction.respond("Created ticket embed", ephemeral=True)
     await interaction.channel.send(embed=embed, view=SupportTicketCreateView())
 
-
-# @bot.slash_command(description="adminticket")
-# async def adminsuppticket(interaction: ApplicationContext):
-#     embed = Embed(
-#         title=f'Admin Ticket',
-#         description='If you need help, feel free to open one of the following tickets. A team admin will be with you in no time.',
-#     )
-#     await interaction.respond("Created ticket embed", ephemeral=True)
-#     await interaction.channel.send(embed=embed, view=AddminTicketCreatView())
-
 bot.run(TOKEN)
-# db.connection.close()
+db.connection.close()
