@@ -57,7 +57,7 @@ class SupportModal(ui.Modal):
         
         ticket_count = variableManager.ticketCount
         
-        db.create_ticket_count(ticket_count)
+        db.update_ticket_count(ticket_count)
         
         await interaction.response.send_message(f"Ticket eröffnet in <#{variableManager.threadID}>", ephemeral=True)
         await thread.send(f"<@{interaction.user.id}> <@{staffrole.id}>", embed=embed, view=TicketManageView())
