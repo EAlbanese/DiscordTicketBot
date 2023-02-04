@@ -2,9 +2,7 @@ from discord import ui, ButtonStyle, InputTextStyle, Interaction, Embed, Permiss
 import database as database
 
 client = Client()
-db = database.Database
-
-db.create_tables()
+db = database.Database("bot.db")
 
 class variableManager(ui.View):
     threadID = 0
@@ -23,7 +21,7 @@ class TicketManageView(ui.View):
         staffrole = interaction.guild.get_role(1070629289520807947)
         
         thread = interaction.guild.get_thread(variableManager.threadID)
-        variableManager.ticketCount = db.get_ticket_count()
+        count = db.get_ticket_count()
                
         if staffrole not in interaction.user.roles:
             await interaction.response.send_message("⛔ Keine Berechtigung!", ephemeral=True)
@@ -33,7 +31,7 @@ class TicketManageView(ui.View):
         embed.author.name = interaction.user.display_name
         embed.author.icon_url = interaction.user.display_avatar
         await interaction.response.send_message(embed=embed)
-        await thread.edit(name=f"{interaction.user.name}")
+        await thread.edit(name=f"{count[0]} - {interaction.user.name}")
 
 class SupportModal(ui.Modal):
     def __init__(self, *args, **kwargs) -> None:
@@ -42,23 +40,23 @@ class SupportModal(ui.Modal):
         self.add_item(ui.InputText(
             label="Wo benötigst du Hilfe?", style=InputTextStyle.long))
 
-    async def callback(self, interaction: Interaction, ticket_count: int):
+    async def callback(self, interaction: Interaction):
         embed = Embed(
             title="Anliegen", description="✅ Danke, dass du dich an den Support gewandt hast. Unser Team wird sich gut darum kümmern!")
         embed.add_field(name="Wo benötigst du Hilfe?",
                         value=self.children[0].value)
         staffrole = interaction.guild.get_role(1070629289520807947)
         channel = await interaction.guild.fetch_channel(1071005969359847464)
-        response = await channel.create_thread(name=f"{interaction.user.display_name}", type=ChannelType.public_thread)
+
+        variableManager.ticketCount += 1
+        ticket_count = variableManager.ticketCount
+        db.update_ticket_count(ticket_count)
+        count = db.get_ticket_count()
+
+        response = await channel.create_thread(name=f"{count[0]} - {interaction.user.display_name}", type=ChannelType.public_thread)
         variableManager.threadID = response.id
         thread = interaction.guild.get_thread(variableManager.threadID)
-        
-        variableManager.ticketCount += 1
-        
-        ticket_count = variableManager.ticketCount
-        
-        db.update_ticket_count(ticket_count)
-        
+
         await interaction.response.send_message(f"Ticket eröffnet in <#{variableManager.threadID}>", ephemeral=True)
         await thread.send(f"<@{interaction.user.id}> <@{staffrole.id}>", embed=embed, view=TicketManageView())
 
@@ -77,7 +75,13 @@ class TeamComplaintModal(ui.Modal):
                         value=self.children[0].value)
         staffrole = interaction.guild.get_role(1070629289520807947)
         channel = await interaction.guild.fetch_channel(1071005969359847464)
-        response = await channel.create_thread(name=f"{interaction.user.display_name}", type=ChannelType.public_thread)
+        
+        variableManager.ticketCount += 1
+        ticket_count = variableManager.ticketCount
+        db.update_ticket_count(ticket_count)
+        count = db.get_ticket_count()
+
+        response = await channel.create_thread(name=f"{count[0]} - {interaction.user.display_name}", type=ChannelType.public_thread)
         variableManager.threadID = response.id
         thread = interaction.guild.get_thread(variableManager.threadID)
         
@@ -100,7 +104,13 @@ class ApplicationModal(ui.Modal):
 
         staffrole = interaction.guild.get_role(1070629289520807947)
         channel = await interaction.guild.fetch_channel(1071005969359847464)
-        response = await channel.create_thread(name=f"{interaction.user.display_name}", type=ChannelType.public_thread)
+        
+        variableManager.ticketCount += 1
+        ticket_count = variableManager.ticketCount
+        db.update_ticket_count(ticket_count)
+        count = db.get_ticket_count()
+
+        response = await channel.create_thread(name=f"{count[0]} - {interaction.user.display_name}", type=ChannelType.public_thread)
         variableManager.threadID = response.id
         thread = interaction.guild.get_thread(variableManager.threadID)
         
@@ -120,5 +130,4 @@ class SupportTicketCreateView(ui.View):
     @ ui.button(emoji="📩", label="Bewerbung", style=ButtonStyle.primary)
     async def third_button_callback(self, button, interaction):
         await interaction.response.send_modal(ApplicationModal(title="Bewerbung"))
-
 

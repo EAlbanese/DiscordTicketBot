@@ -20,11 +20,11 @@ class Database:
     def update_ticket_count(self, ticket_count: int):
         cursor = self.connection.cursor()
 
-        cursor.execute(
-            f'INSERT INTO ticketCounter (ticket_count) VALUES ({ticket_count});')
+        cursor.execute(f'INSERT INTO ticketCounter (ticket_count) VALUES ({ticket_count});')
         self.connection.commit()
 
     def get_ticket_count(self):
         cursor = self.connection.cursor()
+        # query = 
         return cursor.execute(
-            f'SELECT ticket_count FROM ticketCounter DESC LIMIT 1;').fetchall()
+            f'SELECT ticket_count FROM ticketCounter WHERE id = (SELECT MAX(id)  FROM ticketCounter);').fetchone()
