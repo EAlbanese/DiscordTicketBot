@@ -53,7 +53,7 @@ class SupportModal(ui.Modal):
         db.update_ticket_count(ticket_count)
         count = db.get_ticket_count()
 
-        response = await channel.create_thread(name=f"{count[0]} - {interaction.user.display_name}", type=ChannelType.public_thread)
+        response = await channel.create_thread(name=f"{count[0]} - {interaction.user.display_name}", type=ChannelType.private_thread)
         variableManager.threadID = response.id
         thread = interaction.guild.get_thread(variableManager.threadID)
 
