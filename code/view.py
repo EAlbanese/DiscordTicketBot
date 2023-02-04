@@ -73,7 +73,7 @@ class TeamComplaintModal(ui.Modal):
                       description="✅ Danke, dass du dich an den Support gewandt hast. Unser Team wird sich gut darum kümmern!")
         embed.add_field(name="Was für eine Team Beschwerde hast du?",
                         value=self.children[0].value)
-        staffrole = interaction.guild.get_role(1070629289520807947)
+        staffrole = interaction.guild.get_role(1071486720849223792)
         channel = await interaction.guild.fetch_channel(1071005969359847464)
         
         variableManager.ticketCount += 1
@@ -81,7 +81,7 @@ class TeamComplaintModal(ui.Modal):
         db.update_ticket_count(ticket_count)
         count = db.get_ticket_count()
 
-        response = await channel.create_thread(name=f"{count[0]} - {interaction.user.display_name}", type=ChannelType.public_thread)
+        response = await channel.create_thread(name=f"{count[0]} - {interaction.user.display_name}", type=ChannelType.private_thread)
         variableManager.threadID = response.id
         thread = interaction.guild.get_thread(variableManager.threadID)
         
@@ -110,7 +110,7 @@ class ApplicationModal(ui.Modal):
         db.update_ticket_count(ticket_count)
         count = db.get_ticket_count()
 
-        response = await channel.create_thread(name=f"{count[0]} - {interaction.user.display_name}", type=ChannelType.public_thread)
+        response = await channel.create_thread(name=f"{count[0]} - {interaction.user.display_name}", type=ChannelType.private_thread)
         variableManager.threadID = response.id
         thread = interaction.guild.get_thread(variableManager.threadID)
         
@@ -123,11 +123,11 @@ class SupportTicketCreateView(ui.View):
     async def first_button_callback(self, button, interaction):
         await interaction.response.send_modal(SupportModal(title="Anliegen Ticket"))
 
-    @ ui.button(emoji="📩", label="Team Beschwerde", style=ButtonStyle.primary)
+    @ ui.button(emoji="📩", label="Team Beschwerde", style=ButtonStyle.danger)
     async def second_button_callback(self, button, interaction):
         await interaction.response.send_modal(TeamComplaintModal(title="Team Beschwerde"))
 
-    @ ui.button(emoji="📩", label="Bewerbung", style=ButtonStyle.primary)
+    @ ui.button(emoji="📩", label="Bewerbung", style=ButtonStyle.success)
     async def third_button_callback(self, button, interaction):
         await interaction.response.send_modal(ApplicationModal(title="Bewerbung"))
 
