@@ -49,7 +49,7 @@ async def reopen(interaction: ApplicationContext, ticketid: Option(str,  "Ticket
 
     await thread.edit(archived=False, locked=False)
 
-    await interaction.respond("Geschlossenes Ticket ist nun wieder eröffnet", ephemeral=True)
+    await interaction.respond(f"<#{thread.id}> Ticket ist wurde wieder geöffnet", ephemeral=True)
 
 bot.run(TOKEN)
 db.connection.close()

@@ -25,8 +25,8 @@ class TicketManageView(ui.View):
                       description="test test ests afdsaf")
 
         await channel.send(embed=embed)
-        await interaction.response.pong()
         await thread.edit(archived=True, locked=True)
+        await interaction.response.defer()
 
     @ui.button(label="Claim Ticket", style=ButtonStyle.primary)
     async def second_button_callback(self, button, interaction: Interaction):
