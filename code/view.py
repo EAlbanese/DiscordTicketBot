@@ -21,8 +21,11 @@ class TicketManageView(ui.View):
 
         thread = interaction.guild.get_thread(threadId)
 
-        embed = Embed(title=f"Ticket Id: {threadId}",
-                      description="test test ests afdsaf")
+        embed = Embed(title=f"Ticket wurde geschlossen")
+        embed.add_field(name="Ticket ID",
+                        value=f'{threadId} \n')
+        embed.add_field(name="Ticket ID",
+                        value=threadId)               
 
         await channel.send(embed=embed)
         await thread.edit(archived=True, locked=True)

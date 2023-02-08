@@ -8,18 +8,18 @@ class Database:
         except Exception as ex:
             print(f'EXCEPTION: {ex}')
 
-    # def drop_db(self):
-    #     cursor = self.connection.cursor()
+    def drop_db(self):
+        cursor = self.connection.cursor()
 
-    #     cursor.execute(
-    #         f'DROP TABLE tickets;')
-    #     self.connection.commit()
+        cursor.execute(
+            f'DROP TABLE tickets;')
+        self.connection.commit()
 
     def create_tables(self):
         try:
             cursor = self.connection.cursor()
             cursor.execute(
-                'CREATE TABLE IF NOT EXISTS tickets (id INTEGER PRIMARY KEY AUTOINCREMENT, ticket_count INTEGER NOT NULL, ticket_thread_id BIGINT NOT NULL);')
+                'CREATE TABLE IF NOT EXISTS tickets (id INTEGER PRIMARY KEY AUTOINCREMENT, ticket_count INTEGER NOT NULL, ticket_thread_id BIGINT NOT NULL, user_id INTEGER NOT NULL, moderator_id INTEGER NOT NULL, claimed_by_user_id INTEGER NOT NULL, reason TEXT NOT NULL);')
 
             self.connection.commit()
         except Exception as ex:
@@ -48,3 +48,8 @@ class Database:
         cursor = self.connection.cursor()
         return cursor.execute(
             f'SELECT ticket_thread_id FROM tickets WHERE id = (SELECT MAX(id)  FROM tickets);').fetchone()[0]
+
+    def get_ticket_info(self, ticket_thread_id: int):
+        cursor = self.connection.cursor()
+        return cursor.execute(
+            f'SELECT * FROM tickets WHERE ticket_thread_id=?;', (ticket_thread_id)).fetchall() 
