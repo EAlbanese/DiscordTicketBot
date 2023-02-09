@@ -39,14 +39,5 @@ async def ticket(interaction: ApplicationContext):
     await interaction.respond("Created ticket embed", ephemeral=True)
     await interaction.channel.send(embed=embed, view=SupportTicketCreateView())
 
-
-@bot.slash_command(description="Geschlossenes Ticket wird eröffnet")
-async def reopen(interaction: ApplicationContext, ticketid: Option(str,  "Ticket Id eingeben")):
-
-    thread = interaction.guild.get_thread(int(ticketid))
-
-    await thread.edit(archived=False, locked=False)
-    await interaction.respond(f"<#{thread.id}> Ticket wurde wieder geöffnet", ephemeral=True)
-
 bot.run(TOKEN)
 db.connection.close()

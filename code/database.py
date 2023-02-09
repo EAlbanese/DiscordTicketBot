@@ -1,4 +1,5 @@
 import sqlite3
+import datetime
 
 
 class Database:
@@ -19,17 +20,17 @@ class Database:
         try:
             cursor = self.connection.cursor()
             cursor.execute(
-                'CREATE TABLE IF NOT EXISTS tickets (id INTEGER PRIMARY KEY AUTOINCREMENT, ticket_thread_id BIGINT, user_id INTEGER NOT NULL, moderator_id INTEGER);')
+                'CREATE TABLE IF NOT EXISTS tickets (id INTEGER PRIMARY KEY AUTOINCREMENT, ticket_thread_id BIGINT, user_id INTEGER NOT NULL, moderator_id INTEGER, create_date INTEGER);')
 
             self.connection.commit()
         except Exception as ex:
             print(f'EXCEPTION: {ex}')
 
-    def create_ticket(self, user_id: int):
+    def create_ticket(self, user_id: int, create_date: datetime.datetime):
         cursor = self.connection.cursor()
 
         cursor.execute(
-            f'INSERT INTO tickets (user_id) VALUES ({user_id});')
+            f'INSERT INTO tickets (user_id, create_date) VALUES ({user_id}, {create_date.timestamp()});')
         self.connection.commit()
 
     def update_ticket(self, ticket_thread_id: int, id: int):
@@ -46,15 +47,15 @@ class Database:
             'UPDATE tickets SET moderator_id=? WHERE id=?;', (moderator_id, id))
         self.connection.commit()
 
-    def get_ticket_id(self) -> int:
+    def get_ticket_id(self, create_date: int) -> int:
         cursor = self.connection.cursor()
         return cursor.execute(
-            f'SELECT id FROM tickets WHERE id = (SELECT MAX(id)  FROM tickets);').fetchone()[0]
+            f'SELECT id FROM tickets WHERE create_date=?;', (create_date)).fetchone()[0]
 
-    def get_ticket_thread_id(self) -> int:
+    def get_ticket_thread_id(self, create_date: int) -> int:
         cursor = self.connection.cursor()
         return cursor.execute(
-            f'SELECT ticket_thread_id FROM tickets WHERE id = (SELECT MAX(id)  FROM tickets);').fetchone()[0]
+            f'SELECT ticket_thread_id FROM tickets WHERE create_date=?;', (create_date)).fetchone()[0]
 
     def get_ticket_info(self, id: int):
         cursor = self.connection.cursor()
