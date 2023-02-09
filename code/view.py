@@ -40,8 +40,8 @@ class TicketManageView(ui.View):
     async def second_button_callback(self, button, interaction: Interaction):
         staffrole = interaction.guild.get_role(1070629289520807947)
 
-        thread = interaction.guild.get_thread(variableManager.threadID)
-        count = db.get_ticket_id_by_thread_id(variableManager.threadID)
+        thread = interaction.guild.get_thread(interaction.message.channel.id)
+        count = db.get_ticket_id_by_thread_id(interaction.message.channel.id)
 
         if staffrole not in interaction.user.roles:
             await interaction.response.send_message("⛔ Keine Berechtigung!", ephemeral=True)
