@@ -78,9 +78,8 @@ class SupportModal(ui.Modal):
         channel = await interaction.guild.fetch_channel(1071005969359847464)
 
         create_date = datetime.datetime.now()
-        print(create_date)
         db.create_ticket(interaction.user.id, create_date)
-
+        print(create_date.timestamp())
         count = db.get_ticket_id(int(create_date.timestamp()))
 
         response = await channel.create_thread(name=f"{count} - {interaction.user.display_name}", type=ChannelType.private_thread)
