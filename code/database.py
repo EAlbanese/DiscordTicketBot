@@ -26,11 +26,10 @@ class Database:
         except Exception as ex:
             print(f'EXCEPTION: {ex}')
 
-    def create_ticket(self, user_id: int, create_date: datetime.datetime):
+    def create_ticket(self, user_id: int, create_date: int):
         cursor = self.connection.cursor()
 
-        cursor.execute(
-            f'INSERT INTO tickets (user_id, create_date) VALUES ({user_id}, {create_date.timestamp()});')
+        cursor.execute(f'INSERT INTO tickets (user_id, create_date) VALUES (?, ?);', (user_id, create_date))
         self.connection.commit()
 
     def update_ticket(self, ticket_thread_id: int, id: int):
@@ -48,14 +47,14 @@ class Database:
         self.connection.commit()
 
     def get_ticket_id(self, create_date: int) -> int:
-        cursor = self.connection.cursor()
+        cursor = self.connection.cursor()   
         return cursor.execute(
-            f'SELECT id FROM tickets WHERE create_date=?;', (create_date)).fetchone()[0]
+            f'SELECT id FROM tickets WHERE create_date={create_date};').fetchone()[0]
 
-    def get_ticket_thread_id(self, create_date: int) -> int:
-        cursor = self.connection.cursor()
+    def get_ticket_id_by_thread_id(self, thread_id: int) -> int:
+        cursor = self.connection.cursor()   
         return cursor.execute(
-            f'SELECT ticket_thread_id FROM tickets WHERE create_date=?;', (create_date)).fetchone()[0]
+            f'SELECT id FROM tickets WHERE ticket_thread_id={thread_id};').fetchone()[0]
 
     def get_ticket_info(self, id: int):
         cursor = self.connection.cursor()
