@@ -19,7 +19,7 @@ DEBUG_GUILDS = None if config.get('Bot', 'DebugGuilds') == "" else list(
 bot = Bot(debug_guild=DEBUG_GUILDS)
 db = database.Database("bot.db")
 
-db.drop_db()
+# db.drop_db()
 db.create_tables()
 
 
@@ -46,7 +46,7 @@ async def reopen(interaction: ApplicationContext, ticketid: Option(str,  "Ticket
     thread = interaction.guild.get_thread(int(ticketid))
 
     await thread.edit(archived=False, locked=False)
-    await interaction.respond(f"<#{thread.id}> Ticket ist wurde wieder geöffnet", ephemeral=True)
+    await interaction.respond(f"<#{thread.id}> Ticket wurde wieder geöffnet", ephemeral=True)
 
 bot.run(TOKEN)
 db.connection.close()

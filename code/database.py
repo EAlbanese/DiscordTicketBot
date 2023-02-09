@@ -19,37 +19,44 @@ class Database:
         try:
             cursor = self.connection.cursor()
             cursor.execute(
-                'CREATE TABLE IF NOT EXISTS tickets (id INTEGER PRIMARY KEY AUTOINCREMENT, ticket_count INTEGER NOT NULL, ticket_thread_id BIGINT NOT NULL, user_id INTEGER NOT NULL, moderator_id INTEGER NOT NULL, claimed_by_user_id INTEGER NOT NULL, reason TEXT NOT NULL);')
+                'CREATE TABLE IF NOT EXISTS tickets (id INTEGER PRIMARY KEY AUTOINCREMENT, ticket_thread_id BIGINT, user_id INTEGER NOT NULL, moderator_id INTEGER);')
 
             self.connection.commit()
         except Exception as ex:
             print(f'EXCEPTION: {ex}')
 
-    def create_ticket(self, ticket_count: int):
+    def create_ticket(self, user_id: int):
         cursor = self.connection.cursor()
 
         cursor.execute(
-            f'INSERT INTO tickets (ticket_count, ticket_thread_id) VALUES ({ticket_count}, 0);')
+            f'INSERT INTO tickets (user_id) VALUES ({user_id});')
         self.connection.commit()
 
-    def update_ticket(self, ticket_thread_id: int, ticket_count: int):
+    def update_ticket(self, ticket_thread_id: int, id: int):
         cursor = self.connection.cursor()
 
         cursor.execute(
-            'UPDATE tickets SET ticket_thread_id=? WHERE ticket_count=?;', (ticket_thread_id, ticket_count))
+            'UPDATE tickets SET ticket_thread_id=? WHERE id=?;', (ticket_thread_id, id))
         self.connection.commit()
 
-    def get_ticket_count(self) -> int:
+    def update_claimed_ticket(self, moderator_id: int, id: int):
+        cursor = self.connection.cursor()
+
+        cursor.execute(
+            'UPDATE tickets SET moderator_id=? WHERE id=?;', (moderator_id, id))
+        self.connection.commit()
+
+    def get_ticket_id(self) -> int:
         cursor = self.connection.cursor()
         return cursor.execute(
-            f'SELECT ticket_count FROM tickets WHERE id = (SELECT MAX(id)  FROM tickets);').fetchone()[0]
+            f'SELECT id FROM tickets WHERE id = (SELECT MAX(id)  FROM tickets);').fetchone()[0]
 
     def get_ticket_thread_id(self) -> int:
         cursor = self.connection.cursor()
         return cursor.execute(
             f'SELECT ticket_thread_id FROM tickets WHERE id = (SELECT MAX(id)  FROM tickets);').fetchone()[0]
 
-    def get_ticket_info(self, ticket_thread_id: int):
+    def get_ticket_info(self, id: int):
         cursor = self.connection.cursor()
         return cursor.execute(
-            f'SELECT * FROM tickets WHERE ticket_thread_id=?;', (ticket_thread_id)).fetchall() 
+            f'SELECT * FROM tickets WHERE id=?;', (id, )).fetchone()

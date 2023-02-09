@@ -21,11 +21,19 @@ class TicketManageView(ui.View):
 
         thread = interaction.guild.get_thread(threadId)
 
+        ticketId = db.get_ticket_id()
+
+        ticketinfo = db.get_ticket_info(ticketId)
+
         embed = Embed(title=f"Ticket wurde geschlossen")
         embed.add_field(name="Ticket ID",
-                        value=f'{threadId} \n')
-        embed.add_field(name="Ticket ID",
-                        value=threadId)               
+                        value=f'{ticketinfo[0]}')
+        embed.add_field(name="Thread ID",
+                        value=f'{ticketinfo[1]}')
+        embed.add_field(name="Ticket geöffnet von", value=f'{ticketinfo[2]}')
+        embed.add_field(name="Ticket geclaimt von", value=f'{ticketinfo[3]}')
+        embed.add_field(name="Ticket geschlossen von",
+                        value=f'{ticketinfo[3]}')
 
         await channel.send(embed=embed)
         await thread.edit(archived=True, locked=True)
@@ -36,11 +44,12 @@ class TicketManageView(ui.View):
         staffrole = interaction.guild.get_role(1070629289520807947)
 
         thread = interaction.guild.get_thread(variableManager.threadID)
-        count = db.get_ticket_count()
+        count = db.get_ticket_id()
 
         if staffrole not in interaction.user.roles:
             await interaction.response.send_message("⛔ Keine Berechtigung!", ephemeral=True)
             return
+        db.update_claimed_ticket(interaction.user.id, count)
         embed = Embed(title="Ticket Status geändert: Wir sind dabei!",
                       description=f"<@{interaction.user.id}> kümmert sich um dein Ticket.")
         embed.author.name = interaction.user.display_name
@@ -64,10 +73,9 @@ class SupportModal(ui.Modal):
         staffrole = interaction.guild.get_role(1070629289520807947)
         channel = await interaction.guild.fetch_channel(1071005969359847464)
 
-        variableManager.ticketCount += 1
-        ticket_count = variableManager.ticketCount
-        db.create_ticket(ticket_count)
-        count = db.get_ticket_count()
+        db.create_ticket(interaction.user.id)
+
+        count = db.get_ticket_id()
 
         response = await channel.create_thread(name=f"{count} - {interaction.user.display_name}", type=ChannelType.private_thread)
         variableManager.threadID = response.id
@@ -97,11 +105,13 @@ class TeamComplaintModal(ui.Modal):
         variableManager.ticketCount += 1
         ticket_count = variableManager.ticketCount
         db.create_ticket(ticket_count)
-        count = db.get_ticket_count()
+        count = db.get_ticket_id()
 
         response = await channel.create_thread(name=f"{count} - {interaction.user.display_name}", type=ChannelType.private_thread)
         variableManager.threadID = response.id
         thread = interaction.guild.get_thread(variableManager.threadID)
+
+        # db.update_ticket(variableManager.threadID, count, interaction.user.id)
 
         await interaction.response.send_message(f"Ticket eröffnet in <#{variableManager.threadID}>", ephemeral=True)
         await thread.send(f"<@{interaction.user.id}> <@{staffrole.id}>", embed=embed, view=TicketManageView())
@@ -126,11 +136,13 @@ class ApplicationModal(ui.Modal):
         variableManager.ticketCount += 1
         ticket_count = variableManager.ticketCount
         db.create_ticket(ticket_count)
-        count = db.get_ticket_count()
+        count = db.get_ticket_id()
 
         response = await channel.create_thread(name=f"{count} - {interaction.user.display_name}", type=ChannelType.private_thread)
         variableManager.threadID = response.id
         thread = interaction.guild.get_thread(variableManager.threadID)
+
+        # db.update_ticket(variableManager.threadID, count, interaction.user.id)
 
         await interaction.response.send_message(f"Ticket eröffnet in <#{variableManager.threadID}>", ephemeral=True)
         await thread.send(f"<@{interaction.user.id}> <@{staffrole.id}>", embed=embed, view=TicketManageView())
