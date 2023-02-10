@@ -46,8 +46,15 @@ async def ticket(interaction: ApplicationContext):
 async def help(interaction: ApplicationContext):
     embed = Embed(
         title=f'Hilfe',
-        description='Hier findest du alle Commands, welche der Bot kann und wie du diese ausführen kannst. \n \n ❗Falls es doch kein Bug ist, dann bitte ich dich auf **Abbrechen** zu drücken.',
+        description='Hier findest du alle Commands, welche der Bot kann und wie du diese ausführen kannst.',
     )
+    embed.add_field(name="Bug melden", value="Mit ``/bugreport`` kannst du einen Bug melden. Ich bitte dich, sobald du einen Fehler oder Bug gefunden hast, den zu melden!", inline=False)
+    embed.add_field(name="Verbesserungsvorschläge",
+                    value="Mit ``/suggestion`` kannst du mir Verbesserungsvorschläge mitteilen. Ich freue mich über jegliches Feedback von euch.", inline=False)
+    embed.add_field(name="Wünsche",
+                    value="Mit ``/wish`` kannst du mir deinen Wunsch mitteilen. Ich werde mir deinen Wunsch anschauen und mich mit dir in Kontakt setzten.", inline=False)
+    embed.add_field(name="Sonstige Hilfe",
+                    value="Du kannst mir auch jederzeit via Discord DM --> **Draixon#1999** ein Feedback geben oder Fragen über den Bot stellen.", inline=False)
 
     await interaction.respond("Hilfe ist unterwegs!", ephemeral=True)
     await interaction.channel.send(embed=embed)
@@ -58,7 +65,7 @@ async def help(interaction: ApplicationContext):
 async def bugreport(interaction: ApplicationContext):
     embed = Embed(
         title=f'Hast du einen Bug gefunden?',
-        description='Falls du einen Bug gefunden hast, bitte ich dich den genau zu beschreiben.',
+        description='Falls du einen Bug gefunden hast, bitte ich dich den genau zu beschreiben. \n \n ❗Falls es doch kein Bug ist, dann bitte ich dich auf **Abbrechen** zu drücken.',
     )
     await interaction.respond("Danke für das melden!", ephemeral=True)
     await interaction.channel.send(embed=embed, view=BugReportCreateView())
