@@ -208,8 +208,7 @@ class BugReportModal(ui.Modal):
 class BugReportCreateView(ui.View):
     @ui.button(emoji="🗑️", label="Abbrechen", style=ButtonStyle.danger)
     async def cancel_bugreport(self, button, interaction: Interaction):
-
-        await interaction.response.edit_message(delete_after=1)
+        await interaction.message.delete()
 
     @ui.button(emoji="📬", label="Bug melden", style=ButtonStyle.success)
     async def report_bug(self, button, interaction):
@@ -246,8 +245,7 @@ class SuggestionModal(ui.Modal):
 class SuggestionView(ui.View):
     @ui.button(emoji="🗑️", label="Abbrechen", style=ButtonStyle.danger)
     async def cancel_bugreport(self, button, interaction: Interaction):
-
-        await interaction.response.edit_message(delete_after=1)
+        await interaction.message.delete()
 
     @ui.button(emoji="📬", label="Vorschlag erstellen", style=ButtonStyle.success)
     async def report_bug(self, button, interaction):
@@ -284,8 +282,7 @@ class WishModal(ui.Modal):
 class WishView(ui.View):
     @ui.button(emoji="🗑️", label="Abbrechen", style=ButtonStyle.danger)
     async def cancel_bugreport(self, button, interaction: Interaction):
-
-        await interaction.response.edit_message(delete_after=1)
+        await interaction.message.delete()
 
     @ui.button(emoji="📬", label="Wunsch erstellen", style=ButtonStyle.success)
     async def report_bug(self, button, interaction):
