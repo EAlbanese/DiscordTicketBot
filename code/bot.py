@@ -7,7 +7,7 @@ from discord import (ApplicationContext, Bot, Embed,
                      EmbedField, Member, Option, Permissions, Button, PartialEmoji, Activity, ActivityType, Thread)
 # from enums import PunishmentType
 from pytimeparse.timeparse import timeparse
-from view import SupportTicketCreateView, SupportModal, TeamComplaintModal, ApplicationModal
+from view import SupportTicketCreateView, SupportModal, TeamComplaintModal, ApplicationModal, BugReportCreateView
 
 config = configparser.ConfigParser()
 config.read("config.ini")
@@ -26,7 +26,7 @@ db.create_tables()
 @bot.event
 async def on_ready():
     print(f'{bot.user} is connected')
-    await bot.change_presence(activity=Activity(type=ActivityType.watching, name="your Tickets"))
+    await bot.change_presence(activity=Activity(type=ActivityType.watching, name="/help für Hilfe"))
 
 
 # Ticket System
@@ -38,6 +38,31 @@ async def ticket(interaction: ApplicationContext):
     )
     await interaction.respond("Created ticket embed", ephemeral=True)
     await interaction.channel.send(embed=embed, view=SupportTicketCreateView())
+
+# Help
+
+
+@bot.slash_command(description="Ticket System Command-Liste")
+async def help(interaction: ApplicationContext):
+    embed = Embed(
+        title=f'Hilfe',
+        description='Hier findest du alle Commands, welche der Bot kann und wie du diese ausführen kannst. \n \n ❗Falls es doch kein Bug ist, dann bitte ich dich auf **Abbrechen** zu drücken.',
+    )
+
+    await interaction.respond("Hilfe ist unterwegs!", ephemeral=True)
+    await interaction.channel.send(embed=embed)
+
+
+# Bug report
+@bot.slash_command(description="Bug reporten")
+async def bugreport(interaction: ApplicationContext):
+    embed = Embed(
+        title=f'Hast du ein Bug gefunden?',
+        description='Falls du einen Bug gefunden hast, bitte ich dich den genau zu beschreiben.',
+    )
+    await interaction.respond("Danke für das melden!", ephemeral=True)
+    await interaction.channel.send(embed=embed, view=BugReportCreateView())
+
 
 bot.run(TOKEN)
 db.connection.close()

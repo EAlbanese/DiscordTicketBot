@@ -19,18 +19,24 @@ class TicketManageView(ui.View):
 
         thread = interaction.guild.get_thread(interaction.message.channel.id)
 
-        ticketId = db.get_ticket_id_by_thread_id(interaction.message.channel.id)
+        ticketId = db.get_ticket_id_by_thread_id(
+            interaction.message.channel.id)
         ticketinfo = db.get_ticket_info(ticketId)
         ticketClosedBy = interaction.user.display_name
         memberName = interaction.guild.get_member(ticketinfo[2])
         moderatorName = interaction.guild.get_member(ticketinfo[3])
 
         embed = Embed(title=f"🔒 Ticket wurde geschlossen")
-        embed.add_field(name="🎫 Ticket ID", value=f'{ticketinfo[0]}', inline=False)
-        embed.add_field(name="🎫 Thread ID", value=f'{ticketinfo[1]}', inline=False)
-        embed.add_field(name="👤 Ticket geöffnet von", value=f'{memberName}', inline=False)
-        embed.add_field(name="✅ Ticket geclaimt von", value=f'{moderatorName}', inline=False)
-        embed.add_field(name="🔒 Ticket geschlossen von", value=f'{ticketClosedBy}', inline=False)
+        embed.add_field(name="🎫 Ticket ID",
+                        value=f'{ticketinfo[0]}', inline=False)
+        embed.add_field(name="🎫 Thread ID",
+                        value=f'{ticketinfo[1]}', inline=False)
+        embed.add_field(name="👤 Ticket geöffnet von",
+                        value=f'{memberName}', inline=False)
+        embed.add_field(name="✅ Ticket geclaimt von",
+                        value=f'{moderatorName}', inline=False)
+        embed.add_field(name="🔒 Ticket geschlossen von",
+                        value=f'{ticketClosedBy}', inline=False)
 
         await channel.send(embed=embed, view=TicketLogsView())
         await thread.edit(archived=True, locked=True)
@@ -59,8 +65,9 @@ class TicketLogsView(ui.View):
     @ui.button(label="🔓 Ticket erneut öffnen", style=ButtonStyle.primary)
     async def reopenTicket(self, button,  interaction: Interaction):
 
-        thread = interaction.guild.get_thread(int(interaction.message.embeds[0].fields[1].value))
-        
+        thread = interaction.guild.get_thread(
+            int(interaction.message.embeds[0].fields[1].value))
+
         print(thread)
 
         await thread.edit(archived=False, locked=False)
@@ -165,3 +172,40 @@ class SupportTicketCreateView(ui.View):
     @ ui.button(emoji="📩", label="Bewerbung", style=ButtonStyle.success)
     async def third_button_callback(self, button, interaction):
         await interaction.response.send_modal(ApplicationModal(title="Bewerbung"))
+
+
+# Bug report
+class BugReportModal(ui.Modal):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+
+        self.add_item(ui.InputText(
+            label="Bug Titel", style=InputTextStyle.short))
+        self.add_item(ui.InputText(
+            label="Wie offt ist das aufgetreten?", style=InputTextStyle.short))
+        self.add_item(ui.InputText(
+            label="Beschreibe dein Vorgehen bis zum Bug", style=InputTextStyle.long))
+
+    async def callback(self, interaction: Interaction):
+        embed = Embed(title="Neuer Bug-Report")
+        embed.add_field(
+            name="Bug Titel", value=self.children[0].value)
+        embed.add_field(
+            name="Beschreibe dein Vorgehen bis zum Bug", value=self.children[1].value)
+        embed.add_field(
+            name="Wie offt ist das aufgetreten?", value=self.children[2].value)
+
+        draixon = ("Draixon#1999")
+
+        await interaction.response.send_message(f"✅ Bug wurde erfolgreich gemeldet. Vielen Dank ❤️", ephemeral=True)
+        await draixon.send(embed=embed)
+
+
+class BugReportCreateView(ui.View):
+    @ui.button(emoji="🗑️", label="Abbrechen", style=ButtonStyle.danger)
+    async def cancel_bugreport(self, button, interaction: Interaction):
+        await interaction.response.edit_message(delete_after=2)
+
+    @ui.button(emoji="📬", label="Bug melden", style=ButtonStyle.success)
+    async def report_bug(self, button, interaction):
+        await interaction.response.send_modal(BugReportModal(title="Bug melden"))
