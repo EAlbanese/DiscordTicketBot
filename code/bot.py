@@ -7,7 +7,7 @@ from discord import (ApplicationContext, Bot, Embed,
                      EmbedField, Member, Option, Permissions, Button, PartialEmoji, Activity, ActivityType, Thread)
 # from enums import PunishmentType
 from pytimeparse.timeparse import timeparse
-from view import SupportTicketCreateView, SupportModal, TeamComplaintModal, ApplicationModal, BugReportCreateView
+from view import SupportTicketCreateView, SupportModal, TeamComplaintModal, ApplicationModal, BugReportCreateView, SuggestionView, WishView
 
 config = configparser.ConfigParser()
 config.read("config.ini")
@@ -57,11 +57,33 @@ async def help(interaction: ApplicationContext):
 @bot.slash_command(description="Bug reporten")
 async def bugreport(interaction: ApplicationContext):
     embed = Embed(
-        title=f'Hast du ein Bug gefunden?',
+        title=f'Hast du einen Bug gefunden?',
         description='Falls du einen Bug gefunden hast, bitte ich dich den genau zu beschreiben.',
     )
     await interaction.respond("Danke für das melden!", ephemeral=True)
     await interaction.channel.send(embed=embed, view=BugReportCreateView())
+
+
+# Suggestion
+@bot.slash_command(description="Verbesserungsvorschlag")
+async def suggestion(interaction: ApplicationContext):
+    embed = Embed(
+        title=f'Hast du einen Verbesserungsvorschlag?',
+        description='Falls du einen Verbesserungsvorschlag hast, kannst du mir diesen jederzeit mitteilen.',
+    )
+    await interaction.respond("Danke für den Vorschlag!", ephemeral=True)
+    await interaction.channel.send(embed=embed, view=SuggestionView())
+
+
+# Wish
+@bot.slash_command(description="Wünsche")
+async def wish(interaction: ApplicationContext):
+    embed = Embed(
+        title=f'Hast du einen Wunsch?',
+        description='Falls du einen Wunsch hast, kannst du mir diesen jederzeit mitteilen.',
+    )
+    await interaction.respond("Danke für deinen Wunsch!", ephemeral=True)
+    await interaction.channel.send(embed=embed, view=WishView())
 
 
 bot.run(TOKEN)
