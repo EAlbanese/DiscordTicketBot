@@ -90,7 +90,14 @@ class SupportModal(ui.Modal):
 
         create_date = datetime.datetime.now()
 
-        db.create_ticket(interaction.user.id, round(create_date.timestamp()))
+        print(create_date)
+
+        test = db.create_ticket(interaction.user.id,
+                                round(create_date.timestamp()))
+
+        print(test)
+        print("db-test")
+
         count = db.get_ticket_id(round(create_date.timestamp()))
 
         response = await channel.create_thread(name=f"{count} - {interaction.user.display_name}", type=ChannelType.private_thread)
@@ -203,6 +210,7 @@ class BugReportModal(ui.Modal):
 
         await interaction.response.send_message(f"✅ Bug wurde erfolgreich gemeldet. Vielen Dank ❤️", ephemeral=True)
         await draixon.send(embed=embed)
+        await interaction.message.delete()
 
 
 class BugReportCreateView(ui.View):
@@ -240,6 +248,7 @@ class SuggestionModal(ui.Modal):
 
         await interaction.response.send_message(f"✅ Vorschlag wurde erfolgreich eingereicht. Vielen Dank ❤️", ephemeral=True)
         await draixon.send(embed=embed)
+        await interaction.message.delete()
 
 
 class SuggestionView(ui.View):
@@ -277,6 +286,7 @@ class WishModal(ui.Modal):
 
         await interaction.response.send_message(f"✅ Wunsch wurde erfolgreich eingereicht. Vielen Dank ❤️", ephemeral=True)
         await draixon.send(embed=embed)
+        await interaction.message.delete()
 
 
 class WishView(ui.View):
