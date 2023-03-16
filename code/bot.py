@@ -7,7 +7,7 @@ from discord import (ApplicationContext, Bot, Embed,
                      EmbedField, Member, Option, Permissions, Button, PartialEmoji, Activity, ActivityType, Thread)
 # from enums import PunishmentType
 from pytimeparse.timeparse import timeparse
-from view import SupportTicketCreateView, SupportModal, TeamComplaintModal, ApplicationModal, BugReportCreateView, SuggestionView, WishView
+from view import SupportTicketCreateView, SupportModal, TeamComplaintModal, BewerbungModal, BugReportCreateView, SuggestionView, WishView
 
 config = configparser.ConfigParser()
 config.read("config.ini")
@@ -19,8 +19,8 @@ DEBUG_GUILDS = None if config.get('Bot', 'DebugGuilds') == "" else list(
 bot = Bot(debug_guild=DEBUG_GUILDS)
 db = database.Database("bot.db")
 
-# db.drop_db()
-db.create_tables()
+# db.drop_ticketdb()
+db.create_ticket_table()
 
 
 @bot.event

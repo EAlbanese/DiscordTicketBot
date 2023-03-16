@@ -13,23 +13,32 @@ class variableManager(ui.View):
 
 
 class TicketManageView(ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+
     @ui.button(label="Ticket schliessen", style=ButtonStyle.primary)
     async def first_button_callback(self, button,  interaction: Interaction):
-        channel = await interaction.guild.fetch_channel(1072160823088267314)
+        ticketlogs = await interaction.guild.fetch_channel(1072160823088267314)
 
-        thread = interaction.guild.get_thread(interaction.message.channel.id)
-
-        ticketId = db.get_ticket_id_by_thread_id(
+        ticketId = db.get_ticket_id_by_channel_id(
             interaction.message.channel.id)
         ticketinfo = db.get_ticket_info(ticketId)
-        ticketClosedBy = interaction.user.display_name
+        ticketClosedBy = interaction.guild.get_member(interaction.user.id)
         memberName = interaction.guild.get_member(ticketinfo[2])
         moderatorName = interaction.guild.get_member(ticketinfo[3])
+
+        if ticketinfo[3] is None:
+            await interaction.response.send_message("⛔ Keine Berechtigung!", ephemeral=True)
+            return
+
+        if ticketinfo[3] is interaction.user.id:
+            await interaction.response.send_message("⛔ Das Ticket kann nur durch den claimer dieses Ticket geschlossen werden.", ephemeral=True)
+            return
 
         embed = Embed(title=f"🔒 Ticket wurde geschlossen")
         embed.add_field(name="🎫 Ticket ID",
                         value=f'{ticketinfo[0]}', inline=False)
-        embed.add_field(name="🎫 Thread ID",
+        embed.add_field(name="🎫 Channel ID",
                         value=f'{ticketinfo[1]}', inline=False)
         embed.add_field(name="👤 Ticket geöffnet von",
                         value=f'{memberName}', inline=False)
@@ -38,45 +47,32 @@ class TicketManageView(ui.View):
         embed.add_field(name="🔒 Ticket geschlossen von",
                         value=f'{ticketClosedBy}', inline=False)
 
-        await channel.send(embed=embed, view=TicketLogsView())
-        await thread.edit(archived=True, locked=True)
-        await interaction.response.defer()
+        await ticketlogs.send(embed=embed)
+        await interaction.response.pong()
+        await interaction.channel.delete()
 
     @ui.button(label="Claim Ticket", style=ButtonStyle.primary)
     async def second_button_callback(self, button, interaction: Interaction):
         staffrole = interaction.guild.get_role(1070629289520807947)
-
-        thread = interaction.guild.get_thread(interaction.message.channel.id)
-        count = db.get_ticket_id_by_thread_id(interaction.message.channel.id)
-
         if staffrole not in interaction.user.roles:
             await interaction.response.send_message("⛔ Keine Berechtigung!", ephemeral=True)
             return
-        db.update_claimed_ticket(interaction.user.id, count)
         embed = Embed(title="Ticket Status geändert: Wir sind dabei!",
-                      description=f"<@{interaction.user.id}> kümmert sich um dein Ticket.")
+                      description=f"<@{interaction.user.id}> kümmert sich um dein Ticket")
         embed.author.name = interaction.user.display_name
         embed.author.icon_url = interaction.user.display_avatar
+
+        ticketId = db.get_ticket_id_by_channel_id(
+            interaction.message.channel.id)
+        ticketinfo = db.get_ticket_info(ticketId)
+        db.update_claimed_ticket(interaction.user.id, ticketinfo[1])
+
         await interaction.response.send_message(embed=embed)
-        await thread.edit(name=f"{count} - {interaction.user.name}")
-
-
-class TicketLogsView(ui.View):
-    @ui.button(label="🔓 Ticket erneut öffnen", style=ButtonStyle.primary)
-    async def reopenTicket(self, button,  interaction: Interaction):
-
-        thread = interaction.guild.get_thread(
-            int(interaction.message.embeds[0].fields[1].value))
-
-        print(thread)
-
-        await thread.edit(archived=False, locked=False)
-        await interaction.response.send_message(f"<#{thread.id}> Ticket wurde wieder geöffnet", ephemeral=True)
 
 
 class SupportModal(ui.Modal):
     def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs, timeout=None)
 
         self.add_item(ui.InputText(
             label="Wo benötigst du Hilfe?", style=InputTextStyle.long))
@@ -86,33 +82,30 @@ class SupportModal(ui.Modal):
             title="Anliegen", description="✅ Danke, dass du dich an den Support gewandt hast. Unser Team wird sich gut darum kümmern!")
         embed.add_field(name="Wo benötigst du Hilfe?",
                         value=self.children[0].value)
-        channel = await interaction.guild.fetch_channel(1071005969359847464)
+        category = await interaction.guild.fetch_channel(1076894213083496509)
 
         create_date = datetime.datetime.now()
-
-        print(create_date)
-
-        test = db.create_ticket(interaction.user.id,
-                                round(create_date.timestamp()))
-
-        print(test)
-        print("db-test")
-
+        db.create_ticket(interaction.user.id,
+                         round(create_date.timestamp()))
         count = db.get_ticket_id(round(create_date.timestamp()))
 
-        response = await channel.create_thread(name=f"{count} - {interaction.user.display_name}", type=ChannelType.private_thread)
-        variableManager.threadID = response.id
-        thread = interaction.guild.get_thread(variableManager.threadID)
+        staffrole = interaction.guild.get_role(1070629289520807947)
+        ticketchannel = await interaction.guild.create_text_channel(f"{interaction.user.display_name} - {count}", category=category, overwrites={
+            interaction.user: PermissionOverwrite(read_messages=True),
+            interaction.guild.default_role: PermissionOverwrite(
+                read_messages=False),
+            staffrole: PermissionOverwrite(read_messages=True)
+        })
 
-        db.update_ticket(variableManager.threadID, count)
+        db.update_ticket(ticketchannel.id, count)
 
-        await interaction.response.send_message(f"Ticket eröffnet in <#{variableManager.threadID}>", ephemeral=True)
-        await thread.send(f"<@{interaction.user.id}> <@&{1070629289520807947}>", embed=embed, view=TicketManageView())
+        await interaction.response.send_message(f"Ticket eröffnet in <#{ticketchannel.id}>", ephemeral=True)
+        await ticketchannel.send(f"<@{interaction.user.id}> <@&{staffrole.id}>", embed=embed, view=TicketManageView())
 
 
 class TeamComplaintModal(ui.Modal):
     def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs, timeout=None)
 
         self.add_item(ui.InputText(
             label="Was für eine Team Beschwerde hast du?", style=InputTextStyle.long))
@@ -122,25 +115,29 @@ class TeamComplaintModal(ui.Modal):
                       description="✅ Danke, dass du dich an den Support gewandt hast. Unser Team wird sich gut darum kümmern!")
         embed.add_field(name="Was für eine Team Beschwerde hast du?",
                         value=self.children[0].value)
-        channel = await interaction.guild.fetch_channel(1071005969359847464)
+        category = await interaction.guild.fetch_channel(1076894213083496509)
+        adminrole = interaction.guild.get_role(1071486720849223792)
 
         create_date = datetime.datetime.now()
         db.create_ticket(interaction.user.id, round(create_date.timestamp()))
         count = db.get_ticket_id(round(create_date.timestamp()))
 
-        response = await channel.create_thread(name=f"{count} - {interaction.user.display_name}", type=ChannelType.private_thread)
-        variableManager.threadID = response.id
-        thread = interaction.guild.get_thread(variableManager.threadID)
+        ticketchannel = await interaction.guild.create_text_channel(f"{interaction.user.display_name} - {count}", category=category, overwrites={
+            interaction.user: PermissionOverwrite(read_messages=True),
+            interaction.guild.default_role: PermissionOverwrite(
+                read_messages=False),
+            adminrole: PermissionOverwrite(read_messages=True)
+        })
 
-        db.update_ticket(variableManager.threadID, count)
+        db.update_ticket(ticketchannel.id, count)
 
-        await interaction.response.send_message(f"Ticket eröffnet in <#{variableManager.threadID}>", ephemeral=True)
-        await thread.send(f"<@{interaction.user.id}> <@&{1071486720849223792}>", embed=embed, view=TicketManageView())
+        await interaction.response.send_message(f"Ticket eröffnet in <#{ticketchannel.id}>", ephemeral=True)
+        await ticketchannel.send(f"<@{interaction.user.id}> <@&{adminrole.id}>", embed=embed, view=TicketManageView())
 
 
-class ApplicationModal(ui.Modal):
+class BewerbungModal(ui.Modal):
     def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs, timeout=None)
 
         self.add_item(ui.InputText(
             label="Als was möchtest du dich bewerben?", style=InputTextStyle.long))
@@ -151,34 +148,46 @@ class ApplicationModal(ui.Modal):
         embed.add_field(
             name="Als was möchtest du dich bewerben?", value=self.children[0].value)
 
-        channel = await interaction.guild.fetch_channel(1071005969359847464)
+        formembed = Embed(title="Bewerbung einreichen",
+                          description="Wir bitten dich das folgenden Formular auszufüllen, damit unser Team sich deine Bewerbung anschauen kann.")
+        formembed.add_field(
+            name='Google Forms:', value='[Bewerbungs Formular](https://forms.gle/mt5sfLnahoHdm3pv6)')
+        category = await interaction.guild.fetch_channel(1076894213083496509)
+        adminrole = interaction.guild.get_role(1070629289520807947)
 
         create_date = datetime.datetime.now()
         db.create_ticket(interaction.user.id, round(create_date.timestamp()))
         count = db.get_ticket_id(round(create_date.timestamp()))
 
-        response = await channel.create_thread(name=f"{count} - {interaction.user.display_name}", type=ChannelType.private_thread)
-        variableManager.threadID = response.id
-        thread = interaction.guild.get_thread(variableManager.threadID)
+        ticketchannel = await interaction.guild.create_text_channel(f"{interaction.user.display_name} - {count}", category=category, overwrites={
+            interaction.user: PermissionOverwrite(read_messages=True),
+            interaction.guild.default_role: PermissionOverwrite(
+                read_messages=False),
+            adminrole: PermissionOverwrite(read_messages=True)
+        })
 
-        db.update_ticket(variableManager.threadID, count)
+        db.update_ticket(ticketchannel.id, count)
 
-        await interaction.response.send_message(f"Ticket eröffnet in <#{variableManager.threadID}>", ephemeral=True)
-        await thread.send(f"<@{interaction.user.id}> <@&{1070629289520807947}>", embed=embed, view=TicketManageView())
+        await interaction.response.send_message(f"Ticket eröffnet in <#{ticketchannel.id}>", ephemeral=True)
+        await ticketchannel.send(f"<@{interaction.user.id}> <@&{adminrole.id}>", embed=embed, view=TicketManageView())
+        await ticketchannel.send(embed=formembed)
 
 
 class SupportTicketCreateView(ui.View):
-    @ ui.button(emoji="📩", label="Anliegen", style=ButtonStyle.primary)
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @ ui.button(emoji="🆘", label="Anliegen", style=ButtonStyle.primary)
     async def first_button_callback(self, button, interaction):
-        await interaction.response.send_modal(SupportModal(title="Anliegen Ticket"))
+        await interaction.response.send_modal(SupportModal(title="Anliegen"))
 
     @ ui.button(emoji="📩", label="Team Beschwerde", style=ButtonStyle.danger)
     async def second_button_callback(self, button, interaction):
         await interaction.response.send_modal(TeamComplaintModal(title="Team Beschwerde"))
 
-    @ ui.button(emoji="📩", label="Bewerbung", style=ButtonStyle.success)
+    @ ui.button(emoji="📝", label="Bewerbung", style=ButtonStyle.success)
     async def third_button_callback(self, button, interaction):
-        await interaction.response.send_modal(ApplicationModal(title="Bewerbung"))
+        await interaction.response.send_modal(BewerbungModal(title="Bewerbung"))
 
 
 # Bug report
